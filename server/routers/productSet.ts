@@ -28,7 +28,7 @@ export const productSetRouter = createRouter()
       const [productSet] = await ctx.visionClient.getProductSet({
         name: productSetPath,
       })
-      const [productCollection, request, response] =
+      const [productCollection] =
         await ctx.visionClient.listProductsInProductSet(
           {
             name: productSetPath,
@@ -41,7 +41,10 @@ export const productSetRouter = createRouter()
         )
       return {
         productSet,
-        productCollection,
+        productCollection: productCollection.map((product) => ({
+          name: product.name,
+          displayName: product.displayName,
+        })),
       }
     },
   })

@@ -45,7 +45,7 @@ interface NavigationLinkProps {
 function NavigationLink({ linkTo, label }: NavigationLinkProps) {
   const [currentPage, setCurrentPage] = useState(false)
   useEffect(() => {
-    setCurrentPage(location.pathname == linkTo)
+    setCurrentPage(location.pathname.startsWith(linkTo))
   }, [linkTo])
   ;('hover:bg-gray-200')
   return (

@@ -19,3 +19,15 @@ export function Td({ children }: TdProps) {
     </td>
   )
 }
+
+interface NothingTdProps {
+  colspan?: number
+  message?: string
+}
+export function NothingTd({ colspan = 1, message = 'empty' }: NothingTdProps) {
+  return (
+    <td className="p-4 pl-8 text-slate-500" colSpan={colspan}>
+      {message}
+    </td>
+  )
+}

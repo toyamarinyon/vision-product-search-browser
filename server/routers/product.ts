@@ -13,7 +13,10 @@ export const productRouter = createRouter()
         parent: locationPath,
       })
       return {
-        productCollection,
+        productCollection: productCollection.map((product) => ({
+          name: product.name,
+          displayName: product.displayName,
+        })),
       }
     },
   })
@@ -34,6 +37,7 @@ export const productRouter = createRouter()
         parent: productPath,
       })
       return {
+        name: product.name?.split('/').pop(),
         product,
         referenceImages,
       }
