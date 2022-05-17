@@ -11,7 +11,7 @@ yarn
 ### Set up the environment variables
 
 ```
-cp .env.example .env
+cp .env.example .env.local
 ```
 
 Open `.env` and set three variables below:
