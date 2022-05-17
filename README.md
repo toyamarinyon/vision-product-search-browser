@@ -16,15 +16,15 @@ cp .env.example .env
 
 Open `.env` and set three variables below:
 
-- PROJECT
+- `PROJECT`
 
     Your google project id(not project number).
 
-- LOCATION
+- `LOCATION`
 
     Your location used vision product search. Which one of 'us-west1', 'us-east1', 'asia-east1', 'europe-west1'.
 
-- GOOGLE_APPLICATION_CREDENTIALS
+- `GOOGLE_APPLICATION_CREDENTIALS`
 
     Your credentials files path
 
@@ -33,3 +33,5 @@ Open `.env` and set three variables below:
 ```
 yarn dev
 ```
+
+Open http://localhost:8066 in your browser.
