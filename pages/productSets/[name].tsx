@@ -1,15 +1,16 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { Table } from '../../components/productCollection'
+import {
+  ProductCollectionTable,
+  Table,
+} from '../../components/productCollection'
 import { Layout } from '../../layouts'
 import { trpc } from '../../utils/trpc'
 
 const ShowProductSetPage: NextPage = () => {
   const router = useRouter()
-  const query = trpc.useQuery([
-    'productSet.find',
-    { productSetName: router.query.name as string },
-  ])
+  const productSetName = router.query.name as string
+  const query = trpc.useQuery(['productSet.find', { productSetName }])
 
   return (
     <Layout>
@@ -67,10 +68,7 @@ const ShowProductSetPage: NextPage = () => {
           </table>
         </section>
         <h2 className="font-bold text-gray-600 text-sm ml-6">Products</h2>
-        <Table
-          productCollection={query.data?.productCollection ?? []}
-          isLoading={query.isLoading}
-        />
+        <ProductCollectionTable productSetName={productSetName} />
       </>
     </Layout>
   )

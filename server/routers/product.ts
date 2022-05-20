@@ -4,19 +4,60 @@ import { env } from '../../env'
 
 export const productRouter = createRouter()
   .query('findMany', {
-    async resolve({ ctx }) {
-      const locationPath = ctx.visionClient.locationPath(
-        env.PROJECT,
-        env.LOCATION
-      )
-      const [productCollection] = await ctx.visionClient.listProducts({
-        parent: locationPath,
-      })
-      return {
-        productCollection: productCollection.map((product) => ({
-          name: product.name,
-          displayName: product.displayName,
-        })),
+    input: z.object({
+      limit: z.number().optional(),
+      pageToken: z.string().optional(),
+      productSetName: z.string().optional(),
+    }),
+
+    async resolve({ ctx, input }) {
+      if (input.productSetName == null) {
+        const locationPath = ctx.visionClient.locationPath(
+          env.PROJECT,
+          env.LOCATION
+        )
+        const [productCollection, _, response] =
+          await ctx.visionClient.listProducts(
+            {
+              parent: locationPath,
+              pageSize: input?.limit ?? 10,
+              pageToken: input?.pageToken,
+            },
+            {
+              autoPaginate: false,
+            }
+          )
+        return {
+          nextPageToken: response.nextPageToken,
+          productCollection: productCollection.map((product) => ({
+            name: product.name,
+            displayName: product.displayName,
+          })),
+        }
+      } else {
+        const productSetPath = ctx.visionClient.productSetPath(
+          env.PROJECT,
+          env.LOCATION,
+          input.productSetName
+        )
+        const [productCollection, _, response] =
+          await ctx.visionClient.listProductsInProductSet(
+            {
+              name: productSetPath,
+            },
+            {
+              pageSize: 5,
+              maxResults: 5,
+              pageToken: input.pageToken,
+            }
+          )
+        return {
+          nextPageToken: response.nextPageToken,
+          productCollection: productCollection.map((product) => ({
+            name: product.name,
+            displayName: product.displayName,
+          })),
+        }
       }
     },
   })
