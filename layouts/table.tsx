@@ -3,10 +3,14 @@ interface ThProps {
 }
 export function Th({ children }: ThProps) {
   return (
-    <th className="font-medium text-slate-400 text-left sticky z-10 top-0 bg-white">
+    <th className="font-medium text-slate-400 text-left bg-white">
       <div className="border-b pl-8  p-4">{children}</div>
     </th>
   )
+}
+
+export function PageTable<T>(props: T) {
+  return
 }
 
 interface TdProps {

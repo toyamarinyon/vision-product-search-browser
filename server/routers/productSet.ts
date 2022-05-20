@@ -28,23 +28,9 @@ export const productSetRouter = createRouter()
       const [productSet] = await ctx.visionClient.getProductSet({
         name: productSetPath,
       })
-      const [productCollection] =
-        await ctx.visionClient.listProductsInProductSet(
-          {
-            name: productSetPath,
-          },
-          {
-            pageSize: 5,
-            maxResults: 5,
-            pageToken: input.pageToken,
-          }
-        )
+
       return {
         productSet,
-        productCollection: productCollection.map((product) => ({
-          name: product.name,
-          displayName: product.displayName,
-        })),
       }
     },
   })

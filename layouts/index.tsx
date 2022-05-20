@@ -8,8 +8,8 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const [productName, setProductName] = useState('')
   return (
-    <div className="h-screen flex flex-col overflow-y-hidden">
-      <header className="px-8 py-4 border-b">
+    <div className="">
+      <header className="px-8 py-4 border-b fixed top-0 left-0 right-0 bg-white">
         <div className="flex space-x-8">
           <h1 className="text-xl font-bold text-gray-800">
             Vision Product Search Data Browser
@@ -54,13 +54,9 @@ export function Layout({ children }: LayoutProps) {
           </form>
         </div>
       </header>
-      <main className="flex flex-1 h-full">
-        <div className="flex w-full">
-          <div className="border-r pt-8">
-            <Navigation />
-          </div>
-          <div className="h-full overflow-y-scroll w-full">{children}</div>
-        </div>
+      <main className="flex flex-1 pt-20 px-8">
+        <Navigation />
+        <div className="w-full pl-48">{children}</div>
       </main>
     </div>
   )
@@ -68,11 +64,11 @@ export function Layout({ children }: LayoutProps) {
 
 function Navigation() {
   return (
-    <ul className="w-48">
-      <li>
+    <ul className="w-48 fixed border-l border-gray-200 space-y-3">
+      <li style={{ marginLeft: -1 }}>
         <NavigationLink linkTo="/products" label="Products" />
       </li>
-      <li>
+      <li style={{ marginLeft: -1 }}>
         <NavigationLink linkTo="/productSets" label="Product Sets" />
       </li>
     </ul>
@@ -91,8 +87,14 @@ function NavigationLink({ linkTo, label }: NavigationLinkProps) {
   return (
     <Link href={linkTo}>
       <a
-        className={cn('hover:bg-gray-200 pl-8 py-2 block', {
-          'bg-indigo-100': currentPage,
+        className={cn('hover:border-gray-500 pl-4 py-1 block text-sm', {
+          'hover:border-gray-500': !currentPage,
+          'hover:border-indigo-600': currentPage,
+          'border-l-2': currentPage,
+          'border-l': !currentPage,
+          'border-indigo-600': currentPage,
+          'font-bold': currentPage,
+          'border-gray-200': !currentPage,
           'text-indigo-600': currentPage,
           'text-gray-600': !currentPage,
         })}
