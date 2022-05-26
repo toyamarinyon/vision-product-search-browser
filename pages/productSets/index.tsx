@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Layout } from '../../layouts'
 import { Td, Th } from '../../layouts/table'
 import { trpc } from '../../utils/trpc'
+import { formatIndexTime } from '../../utils/formatIndexTime'
 
 const Home: NextPage = () => {
   const productSetsQuery = trpc.useQuery(['productSet.findMany'])
@@ -67,11 +68,7 @@ const Home: NextPage = () => {
                   </Link>
                 </Td>
                 <Td>{productSet.displayName}</Td>
-                <Td>
-                  {productSet.indexTime?.seconds?.toString() == '0'
-                    ? 'No indexing'
-                    : productSet.indexTime?.seconds?.toString()}
-                </Td>
+                <Td>{formatIndexTime(productSet.indexTime)}</Td>
                 <Td>
                   {productSet.indexError == null ||
                   productSet.indexError?.code == 0

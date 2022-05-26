@@ -6,6 +6,23 @@ import {
 } from '../../components/productCollection'
 import { Layout } from '../../layouts'
 import { trpc } from '../../utils/trpc'
+import { formatIndexTime } from '../../utils/formatIndexTime'
+
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => {
+      const { result } = reader
+      if (typeof result == 'string') {
+        resolve(result.replace(/^data:.+;base64,/, ''))
+      } else {
+        reject(new Error('Unexpected file reader result'))
+      }
+    }
+    reader.onerror = (error) => reject(error)
+  })
+}
 
 const ShowProductSetPage: NextPage = () => {
   const router = useRouter()
@@ -53,7 +70,7 @@ const ShowProductSetPage: NextPage = () => {
                   {query.isLoading ? (
                     <div className="h-2 w-24 bg-slate-200 rounded"></div>
                   ) : (
-                    query.data?.productSet.indexTime?.seconds?.toString()
+                    formatIndexTime(query.data?.productSet.indexTime)
                   )}
                 </td>
                 <td className="pr-4 text-sm text-gray-700">
