@@ -109,6 +109,7 @@ const ShowProductSetPage: NextPage = () => {
                       if (e.target.files == null) {
                         return
                       }
+                      setSearchState('searching')
                       const fileEncodedBase64 = await fileToBase64(
                         e.target.files[0]
                       )
