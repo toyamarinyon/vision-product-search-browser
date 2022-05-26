@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@google-cloud/vision": "^2.4.2",
+    "@headlessui/react": "^1.6.3",
+    "@heroicons/react": "^1.0.6",
     "@trpc/client": "^9.23.1",
     "@trpc/next": "^9.23.1",
     "@trpc/react": "^9.23.1",

@@ -3,6 +3,7 @@ import * as trpcNext from '@trpc/server/adapters/next'
 import vision from '@google-cloud/vision'
 
 const visionClient = new vision.ProductSearchClient()
+const imageAnnotatorClient = new vision.ImageAnnotatorClient()
 export const createContext = async ({
   req,
   res,
@@ -12,6 +13,7 @@ export const createContext = async ({
     req,
     res,
     visionClient,
+    imageAnnotatorClient,
   }
 }
 

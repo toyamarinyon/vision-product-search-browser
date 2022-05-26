@@ -1,12 +1,14 @@
 import type { NextPage } from 'next'
+import cl from 'classnames'
 import { useRouter } from 'next/router'
-import {
-  ProductCollectionTable,
-  Table,
-} from '../../components/productCollection'
+import { ProductCollectionTable } from '../../components/productCollection'
 import { Layout } from '../../layouts'
-import { trpc } from '../../utils/trpc'
+import { InferMutationOutput, trpc } from '../../utils/trpc'
 import { formatIndexTime } from '../../utils/formatIndexTime'
+import { useState, Fragment, useRef } from 'react'
+import { Dialog, Transition } from '@headlessui/react'
+import { XIcon } from '@heroicons/react/outline'
+import { SearchResult } from '../../components/searchResult'
 
 async function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -24,10 +26,23 @@ async function fileToBase64(file: File): Promise<string> {
   })
 }
 
+type SearchState = 'searching' | 'found' | 'notFound' | 'idle'
 const ShowProductSetPage: NextPage = () => {
   const router = useRouter()
   const productSetName = router.query.name as string
   const query = trpc.useQuery(['productSet.find', { productSetName }])
+  const imageAnnotator = trpc.useMutation(['productSet.annotate'])
+  const [searchState, setSearchState] = useState<SearchState>('idle')
+  const inputFileRef = useRef<HTMLInputElement>(null)
+  const [searchResult, setSearchResult] =
+    useState<InferMutationOutput<'productSet.annotate'>>()
+  const resetSearch = () => {
+    setSearchState('idle')
+    if (inputFileRef.current == null) {
+      return
+    }
+    inputFileRef.current.value = ''
+  }
 
   return (
     <Layout>
@@ -47,6 +62,9 @@ const ShowProductSetPage: NextPage = () => {
                 </th>
                 <th className="pr-4 text-left font-bold text-gray-600 text-sm">
                   Index Error
+                </th>
+                <th className="pr-4 text-left font-bold text-gray-600 text-sm">
+                  Try to Search
                 </th>
               </tr>
             </thead>
@@ -80,12 +98,104 @@ const ShowProductSetPage: NextPage = () => {
                     query.data?.productSet.indexError?.message
                   )}
                 </td>
+                <td className="pr-4 text-sm text-gray-700">
+                  <input
+                    ref={inputFileRef}
+                    className={cl({
+                      hidden: searchState !== 'idle',
+                    })}
+                    type="file"
+                    onChange={async (e) => {
+                      if (e.target.files == null) {
+                        return
+                      }
+                      const fileEncodedBase64 = await fileToBase64(
+                        e.target.files[0]
+                      )
+                      const result = await imageAnnotator.mutateAsync({
+                        productSetName,
+                        fileEncodedBase64,
+                      })
+                      setSearchState('found')
+                      setSearchResult(result)
+                    }}
+                  />
+                  {searchState === 'searching' && 'Searching...'}
+                </td>
               </tr>
             </tbody>
           </table>
         </section>
         <h2 className="font-bold text-gray-600 text-sm ml-6">Products</h2>
         <ProductCollectionTable productSetName={productSetName} />
+        <Transition.Root show={searchState === 'found'} as={Fragment}>
+          <Dialog
+            as="div"
+            className="relative z-10"
+            onClose={() => resetSearch()}
+          >
+            <Transition.Child
+              as={Fragment}
+              enter="ease-in-out duration-500"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in-out duration-500"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            </Transition.Child>
+
+            <div className="fixed inset-0 overflow-hidden">
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+                  <Transition.Child
+                    as={Fragment}
+                    enter="transform transition ease-in-out duration-500 sm:duration-700"
+                    enterFrom="translate-x-full"
+                    enterTo="translate-x-0"
+                    leave="transform transition ease-in-out duration-500 sm:duration-700"
+                    leaveFrom="translate-x-0"
+                    leaveTo="translate-x-full"
+                  >
+                    <Dialog.Panel className="pointer-events-auto relative">
+                      <Transition.Child
+                        as={Fragment}
+                        enter="ease-in-out duration-500"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in-out duration-500"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <div className="absolute top-0 left-0 -ml-8 flex pt-4 pr-2 sm:-ml-10 sm:pr-4">
+                          <button
+                            type="button"
+                            className="rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
+                            onClick={() => resetSearch()}
+                          >
+                            <span className="sr-only">Close panel</span>
+                            <XIcon className="h-6 w-6" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </Transition.Child>
+                      <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
+                        <div className="px-4 sm:px-6">
+                          <Dialog.Title className="text-lg font-medium text-gray-900">
+                            Search Result
+                          </Dialog.Title>
+                        </div>
+                        <div className="relative mt-6 flex-1 px-4 sm:px-6">
+                          <SearchResult data={searchResult} />
+                        </div>
+                      </div>
+                    </Dialog.Panel>
+                  </Transition.Child>
+                </div>
+              </div>
+            </div>
+          </Dialog>
+        </Transition.Root>
       </>
     </Layout>
   )
