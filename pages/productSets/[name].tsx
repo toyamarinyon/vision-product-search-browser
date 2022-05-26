@@ -109,6 +109,27 @@ const ShowProductSetPage: NextPage = () => {
                       if (e.target.files == null) {
                         return
                       }
+                      const file = e.target.files[0]
+
+                      const fileSizeMegabytes = file.size / 1024 / 1024
+                      if (fileSizeMegabytes > 3) {
+                        alert(
+                          'File too large. Please select a file less than 3MB'
+                        )
+                        resetSearch()
+                        return
+                      }
+                      if (
+                        file.type !== 'image/jpeg' &&
+                        file.type !== 'image/png'
+                      ) {
+                        alert(
+                          'File type not supported. Please select a jpeg or png file'
+                        )
+                        resetSearch()
+                        return
+                      }
+
                       setSearchState('searching')
                       const fileEncodedBase64 = await fileToBase64(
                         e.target.files[0]
