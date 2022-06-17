@@ -14,13 +14,31 @@ async function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.readAsDataURL(file)
-    reader.onload = () => {
-      const { result } = reader
-      if (typeof result == 'string') {
-        resolve(result.replace(/^data:.+;base64,/, ''))
-      } else {
-        reject(new Error('Unexpected file reader result'))
+    reader.onload = (readerEvent) => {
+      const img = document.createElement('img')
+      img.onload = (event) => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        const resizeRatio =
+          img.width > img.height ? 300 / img.width : 300 / img.height
+        console.log(resizeRatio)
+        ctx?.drawImage(
+          img,
+          0,
+          0,
+          img.width * resizeRatio,
+          img.height * resizeRatio
+        )
+        const dataUrl = canvas.toDataURL(file.type)
+        resolve(dataUrl.replace(/^data:.+;base64,/, ''))
       }
+      img.src = readerEvent.target?.result as string
+      // const { result } = reader
+      // if (typeof result == 'string') {
+      //   resolve(result.replace(/^data:.+;base64,/, ''))
+      // } else {
+      //   reject(new Error('Unexpected file reader result'))
+      // }
     }
     reader.onerror = (error) => reject(error)
   })
