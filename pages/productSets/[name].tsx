@@ -10,7 +10,8 @@ import { Dialog, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
 import { SearchResult } from '../../components/searchResult'
 
-async function fileToBase64(file: File): Promise<string> {
+const resizeImageSize = 700
+async function fileToBase64(file: File): Promise<[string, string]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.readAsDataURL(file)
@@ -20,8 +21,11 @@ async function fileToBase64(file: File): Promise<string> {
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
         const resizeRatio =
-          img.width > img.height ? 300 / img.width : 300 / img.height
-        console.log(resizeRatio)
+          img.width > img.height
+            ? resizeImageSize / img.width
+            : resizeImageSize / img.height
+        canvas.width = img.width * resizeRatio
+        canvas.height = img.height * resizeRatio
         ctx?.drawImage(
           img,
           0,
@@ -30,7 +34,7 @@ async function fileToBase64(file: File): Promise<string> {
           img.height * resizeRatio
         )
         const dataUrl = canvas.toDataURL(file.type)
-        resolve(dataUrl.replace(/^data:.+;base64,/, ''))
+        resolve([dataUrl.replace(/^data:.+;base64,/, ''), dataUrl])
       }
       img.src = readerEvent.target?.result as string
       // const { result } = reader
@@ -54,6 +58,8 @@ const ShowProductSetPage: NextPage = () => {
   const inputFileRef = useRef<HTMLInputElement>(null)
   const [searchResult, setSearchResult] =
     useState<InferMutationOutput<'productSet.annotate'>>()
+  const [searchImageEncodedBase64, setSearchImageEncodedBase64] =
+    useState<string>()
   const resetSearch = () => {
     setSearchState('idle')
     if (inputFileRef.current == null) {
@@ -149,13 +155,13 @@ const ShowProductSetPage: NextPage = () => {
                       }
 
                       setSearchState('searching')
-                      const fileEncodedBase64 = await fileToBase64(
-                        e.target.files[0]
-                      )
+                      const [fileEncodedBase64ForHttp, fileEncodedBase64] =
+                        await fileToBase64(e.target.files[0])
                       const result = await imageAnnotator.mutateAsync({
                         productSetName,
-                        fileEncodedBase64,
+                        fileEncodedBase64: fileEncodedBase64ForHttp,
                       })
+                      setSearchImageEncodedBase64(fileEncodedBase64)
                       setSearchState('found')
                       setSearchResult(result)
                     }}
@@ -226,7 +232,10 @@ const ShowProductSetPage: NextPage = () => {
                           </Dialog.Title>
                         </div>
                         <div className="relative mt-6 flex-1 px-4 sm:px-6">
-                          <SearchResult data={searchResult} />
+                          <SearchResult
+                            data={searchResult}
+                            searchImageEncodedBase64={searchImageEncodedBase64}
+                          />
                         </div>
                       </div>
                     </Dialog.Panel>
